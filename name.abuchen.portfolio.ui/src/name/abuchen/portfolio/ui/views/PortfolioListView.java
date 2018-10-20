@@ -23,6 +23,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 
+import com.ibm.icu.text.MessageFormat;
+
 import name.abuchen.portfolio.model.Account;
 import name.abuchen.portfolio.model.Portfolio;
 import name.abuchen.portfolio.money.CurrencyConverter;
@@ -33,6 +35,7 @@ import name.abuchen.portfolio.ui.Images;
 import name.abuchen.portfolio.ui.Messages;
 import name.abuchen.portfolio.ui.PortfolioPart;
 import name.abuchen.portfolio.ui.util.AbstractDropDown;
+import name.abuchen.portfolio.ui.util.ConfirmAction;
 import name.abuchen.portfolio.ui.util.SimpleAction;
 import name.abuchen.portfolio.ui.util.viewers.Column;
 import name.abuchen.portfolio.ui.util.viewers.ColumnEditingSupport;
@@ -267,29 +270,22 @@ public class PortfolioListView extends AbstractListView implements ModificationL
 
         manager.add(new Separator());
 
-        manager.add(new Action(
-                        portfolio.isRetired() ? Messages.PortfolioMenuActivate : Messages.PortfolioMenuDeactivate)
-        {
-            @Override
-            public void run()
-            {
-                portfolio.setRetired(!portfolio.isRetired());
-                markDirty();
-                setInput();
-            }
+        manager.add(new SimpleAction(
+                        portfolio.isRetired() ? Messages.PortfolioMenuActivate : Messages.PortfolioMenuDeactivate,
+                        a -> {
+                            portfolio.setRetired(!portfolio.isRetired());
+                            markDirty();
+                            setInput();
+                        }));
 
-        });
-
-        manager.add(new Action(Messages.PortfolioMenuDelete)
-        {
-            @Override
-            public void run()
-            {
-                getClient().removePortfolio(portfolio);
-                markDirty();
-                setInput();
-            }
-        });
+        manager.add(new ConfirmAction(
+                        Messages.PortfolioMenuDelete, 
+                        MessageFormat.format(Messages.PortfolioMenuDeleteConfirm, portfolio.getName()), 
+                        a -> {
+                            getClient().removePortfolio(portfolio);
+                            markDirty();
+                            setInput();
+                        }));
     }
 
     // //////////////////////////////////////////////////////////////
