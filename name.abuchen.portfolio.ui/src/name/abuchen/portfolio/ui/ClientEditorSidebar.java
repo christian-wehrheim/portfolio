@@ -32,6 +32,7 @@ import name.abuchen.portfolio.model.TaxonomyTemplate;
 import name.abuchen.portfolio.model.Watchlist;
 import name.abuchen.portfolio.ui.Sidebar.Entry;
 import name.abuchen.portfolio.ui.dnd.SecurityTransfer;
+import name.abuchen.portfolio.ui.util.ConfirmAction;
 import name.abuchen.portfolio.ui.util.LabelOnly;
 import name.abuchen.portfolio.ui.util.SimpleAction;
 
@@ -473,18 +474,10 @@ import name.abuchen.portfolio.ui.util.SimpleAction;
             }
         });
 
-        manager.add(new Action(Messages.MenuTaxonomyDelete)
-        {
-            @Override
-            public void run()
-            {
-                editor.getClient().removeTaxonomy(taxonomy);
-                editor.markDirty();
-                entry.dispose();
-                statementOfAssets.select();
-                scrolledComposite.setMinSize(sidebar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-            }
-        });
+        manager.add(new ConfirmAction(
+                        Messages.MenuTaxonomyDelete, 
+                        MessageFormat.format(Messages.MenuTaxonomyDeleteConfirm, taxonomy.getName()), 
+                        a -> deleteTaxonomyAndDisposeEntry(taxonomy, entry)));
         manager.add(new Separator());
 
         addMoveUpAndDownActions(taxonomy, entry, manager);
@@ -569,5 +562,13 @@ import name.abuchen.portfolio.ui.util.SimpleAction;
 
         if ("yes".equals(System.getProperty("name.abuchen.portfolio.debug"))) //$NON-NLS-1$ //$NON-NLS-2$
             new Entry(section, new ActivateViewAction("Browser Test", "BrowserTest")); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+    
+    private void deleteTaxonomyAndDisposeEntry(Taxonomy taxonomy, Entry entry) {
+        editor.getClient().removeTaxonomy(taxonomy);
+        editor.markDirty();
+        entry.dispose();
+        statementOfAssets.select();
+        scrolledComposite.setMinSize(sidebar.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     }
 }
